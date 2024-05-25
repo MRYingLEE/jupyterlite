@@ -1,3 +1,5 @@
+Playground
+
 # JupyterLite
 
 [![ci-badge]][ci] [![lite-badge]][lite] [![binder-badge]][binder] [![docs-badge]][docs]
