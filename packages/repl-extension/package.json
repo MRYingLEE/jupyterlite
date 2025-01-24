@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlite/repl-extension",
-  "version": "0.5.0",
+  "version": "0.6.0-alpha.0",
   "description": "JupyterLite - Console Extension",
   "homepage": "https://github.com/jupyterlite/jupyterlite",
   "bugs": {
@@ -38,13 +38,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "~4.3.4",
-    "@jupyterlab/apputils": "~4.4.4",
-    "@jupyterlab/console": "~4.3.4",
-    "@jupyterlab/translation": "~4.3.4",
-    "@jupyterlab/ui-components": "~4.3.4",
-    "@jupyterlite/application": "^0.5.0",
-    "@jupyterlite/ui-components": "^0.5.0",
+    "@jupyterlab/application": "~4.4.0-alpha.2",
+    "@jupyterlab/apputils": "~4.5.0-alpha.2",
+    "@jupyterlab/console": "~4.4.0-alpha.2",
+    "@jupyterlab/translation": "~4.4.0-alpha.2",
+    "@jupyterlab/ui-components": "~4.4.0-alpha.2",
+    "@jupyterlite/application": "^0.6.0-alpha.0",
+    "@jupyterlite/ui-components": "^0.6.0-alpha.0",
     "@lumino/widgets": "^2.5.0"
   },
   "devDependencies": {
