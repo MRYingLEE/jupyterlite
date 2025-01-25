@@ -184,7 +184,7 @@
     "yjs": "^13.5.40"
   },
   "jupyterlab": {
-    "title": "JupyterLite",
+    "title": "datai.now",
     "appClassName": "JupyterLab",
     "appModuleName": "@jupyterlab/application",
     "extensions": [
