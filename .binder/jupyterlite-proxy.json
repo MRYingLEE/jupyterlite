@@ -5,14 +5,14 @@
         "command": ["jlpm", "serve:py", "{port}"],
         "launcher_entry": {
           "icon_path": "docs/_static/icon.svg",
-          "title": "JupyterLite (py)"
+          "title": "datai.now (py)"
         }
       },
       "jupyterlite-js": {
         "command": ["jlpm", "serve"],
         "launcher_entry": {
           "icon_path": "docs/_static/icon.svg",
-          "title": "JupyterLite (js)"
+          "title": "datai.now (js)"
         },
         "environment": {
           "PORT": "{port}"
