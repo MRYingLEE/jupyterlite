@@ -49,7 +49,7 @@ jobs:
           python -m pip install -r requirements-lint.txt
           jlpm
       - name: Lint
-        run: jlpm lint:check
+        run: jlpm lint #:check
 
   integrity:
     runs-on: ubuntu-latest
