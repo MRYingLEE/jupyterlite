@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling>=1.6.3,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lite-widget-input"
+version = "0.1.0.dev0"
+description = "Experimental frontend widget snapshot input for JupyterLite"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "BSD-3-Clause" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["lite_widget_input"]
