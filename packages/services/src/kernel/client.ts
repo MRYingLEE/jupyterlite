@@ -196,12 +196,23 @@ export class LiteKernelClient implements Kernel.IKernelAPIClient {
           }
 
           if (msg.header.msg_type === 'input_reply') {
+            if (msg.header.session !== clientId) {
+              console.warn('Ignoring stdin reply from a different client session');
+              return;
+            }
             const parentHeader = msg.parent_header as KernelMessage.IHeader;
             const stdinPromise = this._stdinPromises.get(parentHeader.msg_id);
             if (stdinPromise !== undefined) {
+              if (
+                stdinPromise.clientId !== clientId ||
+                stdinPromise.kernelId !== kernelId
+              ) {
+                console.warn('Ignoring stdin reply from a different input owner');
+                return;
+              }
               // Stdin handled by Service Worker.
               this._stdinPromises.delete(parentHeader.msg_id);
-              stdinPromise.resolve(msg as KernelMessage.IInputReplyMsg);
+              stdinPromise.delegate.resolve(msg as KernelMessage.IInputReplyMsg);
             } else {
               // Stdin handled by SharedArrayBuffer which is like conventional message
               // passing to kernel except we cannot use processMsg as the mutex is
@@ -386,10 +397,11 @@ export class LiteKernelClient implements Kernel.IKernelAPIClient {
     const mutex = this._mutexMap.get(kernelId);
     if (!mutex) {
       console.warn('No mutex to cancel');
-      return;
+    } else {
+      this._cancelReason.set(mutex, 'interrupt');
+      mutex.cancel();
     }
-    this._cancelReason.set(mutex, 'interrupt');
-    mutex.cancel();
+    await kernel.interrupt?.();
   }
 
   /**
@@ -437,16 +449,29 @@ export class LiteKernelClient implements Kernel.IKernelAPIClient {
   ): Promise<KernelMessage.IInputReplyMsg> {
     // Multiple kernels may be waiting for stdin at the same time, so keep one promise per
     // input request and resolve it from the input reply that has that request as parent.
-    const stdinPromise = new PromiseDelegate<KernelMessage.IInputReplyMsg>();
-    this._stdinPromises.set(inputRequest.header.msg_id, stdinPromise);
-
     const clientId = inputRequest.parent_header.session;
     const kernelId = this._getClientKernel(clientId);
-    if (kernelId !== undefined) {
-      const sendMessage = this._kernelSends.get(kernelId);
-      if (sendMessage !== undefined) {
-        sendMessage(inputRequest);
-      }
+    if (kernelId === undefined) {
+      throw new Error('Cannot route stdin request without an owning client');
+    }
+    const sendMessage = this._kernelSends.get(kernelId);
+    if (sendMessage === undefined) {
+      throw new Error('Cannot route stdin request without a kernel sender');
+    }
+    if (this._stdinPromises.has(inputRequest.header.msg_id)) {
+      throw new Error('Duplicate stdin request ID');
+    }
+    const stdinPromise = new PromiseDelegate<KernelMessage.IInputReplyMsg>();
+    this._stdinPromises.set(inputRequest.header.msg_id, {
+      delegate: stdinPromise,
+      clientId,
+      kernelId,
+    });
+    try {
+      sendMessage(inputRequest);
+    } catch (error) {
+      this._stdinPromises.delete(inputRequest.header.msg_id);
+      throw error;
     }
 
     // Promise is resolved by input reply message.
@@ -473,7 +498,11 @@ export class LiteKernelClient implements Kernel.IKernelAPIClient {
   private _changed = new Signal<this, IObservableMap.IChangedArgs<IKernel>>(this);
   private _stdinPromises = new Map<
     string,
-    PromiseDelegate<KernelMessage.IInputReplyMsg>
+    {
+      delegate: PromiseDelegate<KernelMessage.IInputReplyMsg>;
+      clientId: string;
+      kernelId: string;
+    }
   >();
   private _kernelSends = new ObservableMap<(msg: KernelMessage.IMessage) => void>();
   private _cancelReason = new WeakMap<

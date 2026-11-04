@@ -91,6 +91,11 @@ export interface IKernel extends IObservableDisposable {
    * @param msg The message to handle
    */
   handleMessage(msg: KernelMessage.IMessage): Promise<void>;
+
+  /**
+   * Interrupt an active kernel operation without acquiring its execution mutex.
+   */
+  interrupt?(): Promise<void>;
 }
 
 /**
